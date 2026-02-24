@@ -10,124 +10,120 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            display: flex; margin: 0; justify-content: center; align-items: center; padding: 20px;
         }
         .container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 600px;
-            width: 100%;
+            background: white; border-radius: 20px; padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 600px; width: 100%;
         }
-        h1 { color: #333; margin-bottom: 10px; font-size: 28px; }
-        .subtitle { color: #666; margin-bottom: 30px; font-size: 14px; }
+        h1 { color: #333; margin-bottom: 10px; font-size: 28px; text-align: center; }
         .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
-        .stat-card { background: #f8f9fa; padding: 15px; border-radius: 10px; text-align: center; }
+        .stat-card { background: #f8f9fa; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #eee; }
         .stat-value { font-size: 24px; font-weight: bold; color: #667eea; }
         .stat-label { font-size: 12px; color: #666; }
         .input-group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
-        input {
-            width: 100%; padding: 12px 16px; border: 2px solid #e0e0e0;
-            border-radius: 10px; font-size: 16px;
-        }
+        input { width: 100%; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; outline: none; transition: 0.3s; }
+        input:focus { border-color: #667eea; }
         button {
-            width: 100%; padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white; border: none; border-radius: 10px;
-            font-size: 16px; font-weight: 600; cursor: pointer;
+            width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s;
         }
-        .results { margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px; border-left: 4px solid #667eea; }
-        .result-item { margin: 10px 0; padding: 10px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; margin-left: 10px; }
+        button:active { transform: scale(0.98); }
+        .results { margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px; border-left: 4px solid #667eea; max-height: 300px; overflow-y: auto; }
+        .result-item { margin: 10px 0; padding: 12px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
         .status-success { background: #d4edda; color: #155724; }
         .status-error { background: #f8d7da; color: #721c24; }
-        .error-message { color: #dc3545; background: #f8d7da; padding: 10px; border-radius: 5px; margin: 10px 0; display: none; }
-        .loading { display: none; text-align: center; margin: 20px 0; }
+        .error-message { color: #dc3545; background: #f8d7da; padding: 10px; border-radius: 5px; margin: 10px 0; display: none; font-size: 14px; }
+        .loading { display: none; text-align: center; margin: 20px 0; color: #667eea; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎟️ SHEIN Voucher Checker</h1>
-        <p class="subtitle">Check phone numbers for SHEIN vouchers (Cloud Version)</p>
-        
+        <h1>🎟️ SHEIN Checker</h1>
         <div class="stats">
-            <div class="stat-card"><div class="stat-value" id="totalChecked">0</div><div class="stat-label">Total</div></div>
-            <div class="stat-card"><div class="stat-value" id="registered">0</div><div class="stat-label">Registered</div></div>
+            <div class="stat-card"><div class="stat-value" id="totalChecked">0</div><div class="stat-label">Checked</div></div>
+            <div class="stat-card"><div class="stat-value" id="registered">0</div><div class="stat-label">Hits</div></div>
             <div class="stat-card"><div class="stat-value" id="vouchers">0</div><div class="stat-label">Vouchers</div></div>
         </div>
-        
         <div class="input-group">
             <label>Phone Number Base</label>
-            <input type="text" id="phoneNumber" placeholder="Enter number" value="98765">
+            <input type="text" id="phoneNumber" placeholder="98765" value="98451">
         </div>
-        
         <div class="input-group">
-            <label>Numbers to Check</label>
-            <input type="number" id="checkCount" min="1" max="100" value="10">
+            <label>Check Count</label>
+            <input type="number" id="checkCount" value="10">
         </div>
-        
         <button id="checkBtn" onclick="startChecking()">Start Checking</button>
-        
-        <div class="loading" id="loading"><p>Checking... <span id="currentNumber"></span></p></div>
+        <div class="loading" id="loading">Checking... <span id="currentNumber"></span></div>
         <div class="error-message" id="error"></div>
-        <div class="results" id="results"><h3>📊 Results</h3><div id="resultsList"></div></div>
+        <div class="results">
+            <h3>📊 Live Results</h3>
+            <div id="resultsList"></div>
+        </div>
     </div>
 
     <script>
         let isChecking = false;
-        let stats = { total: 0, registered: 0, vouchers: 0 };
-        
+        let stats = { total: 0, hits: 0 };
+
         async function checkNumber(number) {
             try {
-                // FIXED URL: matching vercel.json route
+                // FIXED: Direct call to routed path
                 const response = await fetch('/api/check', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ number: number })
                 });
-                return await response.json();
+
+                const text = await response.text();
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    return { error: "Invalid Response from Server" };
+                }
             } catch (error) {
-                return { error: error.message };
+                return { error: "Network Error" };
             }
         }
-        
-        function updateUI(result) {
+
+        function addResult(res) {
             stats.total++;
-            if (result.status === 'registered') stats.registered++;
+            if (res.status === 'registered') stats.hits++;
             document.getElementById('totalChecked').textContent = stats.total;
-            document.getElementById('registered').textContent = stats.registered;
+            document.getElementById('registered').textContent = stats.hits;
 
             const list = document.getElementById('resultsList');
-            const item = document.createElement('div');
-            item.className = 'result-item';
-            let badge = result.status === 'registered' ? 'status-success' : 'status-error';
-            item.innerHTML = `<strong>📞 ${result.number}</strong> <span class="status-badge ${badge}">${result.status}</span>`;
-            list.insertBefore(item, list.firstChild);
+            const div = document.createElement('div');
+            div.className = 'result-item';
+            const badge = res.status === 'registered' ? 'status-success' : 'status-error';
+            const statusText = res.status === 'registered' ? 'HIT!' : 'FAILED';
+            div.innerHTML = `<span>📞 ${res.number}</span> <span class="status-badge ${badge}">${statusText}</span>`;
+            list.insertBefore(div, list.firstChild);
         }
 
         async function startChecking() {
             if (isChecking) return;
             const base = document.getElementById('phoneNumber').value.trim();
             const count = parseInt(document.getElementById('checkCount').value);
-            
+            if (!base) return;
+
             isChecking = true;
             document.getElementById('loading').style.display = 'block';
-            
+            document.getElementById('error').style.display = 'none';
+
             for (let i = 0; i < count; i++) {
                 document.getElementById('currentNumber').textContent = `(${i+1}/${count})`;
                 const res = await checkNumber(base);
                 if (res.error) {
-                    document.getElementById('error').textContent = res.error;
-                    document.getElementById('error').style.display = 'block';
-                    break;
+                    const errDiv = document.getElementById('error');
+                    errDiv.textContent = res.error;
+                    errDiv.style.display = 'block';
+                    break; 
                 }
-                updateUI(res);
-                await new Promise(r => setTimeout(r, 1000));
+                addResult(res);
+                await new Promise(r => setTimeout(r, 800));
             }
             isChecking = false;
             document.getElementById('loading').style.display = 'none';
