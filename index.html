@@ -185,6 +185,7 @@
             border-radius: 5px;
             margin: 10px 0;
             display: none;
+            word-wrap: break-word;
         }
         
         .auto-mode {
@@ -265,11 +266,20 @@
                     body: JSON.stringify({ number: number })
                 });
                 
-                const data = await response.json();
-                return data;
+                // NAYA LOGIC: JSON ki jagah pehle TEXT nikalte hain taki crash na ho
+                const text = await response.text();
+                
+                try {
+                    const data = JSON.parse(text);
+                    return data;
+                } catch (jsonError) {
+                    console.error('Server Error Data:', text);
+                    return { error: 'Server Blocked/Error: ' + text.substring(0, 60) + '...' };
+                }
+                
             } catch (error) {
-                console.error('Error:', error);
-                return { error: error.message };
+                console.error('Network Error:', error);
+                return { error: "Network Error: " + error.message };
             }
         }
         
@@ -309,7 +319,7 @@
                         <strong>📞 ${result.number}</strong>
                         <span class="status-badge ${statusClass}">${statusText}</span>
                     </div>
-                    <small>${result.timestamp}</small>
+                    <small>${result.timestamp || new Date().toLocaleTimeString()}</small>
                 </div>
                 ${result.encryptedId ? `<div style="font-size: 12px; margin-top: 5px; color: #666;">ID: ${result.encryptedId.substring(0, 20)}...</div>` : ''}
                 ${result.error ? `<div style="color: #dc3545; font-size: 12px; margin-top: 5px;">Error: ${result.error}</div>` : ''}
@@ -346,6 +356,8 @@
                 
                 if (result.error) {
                     showError(result.error);
+                    // Agar ek baar block ho jaye toh loop rok do taki baaki requests waste na ho
+                    break; 
                 } else {
                     updateStats(result);
                     addResultToUI(result);
@@ -366,18 +378,12 @@
             const autoBtn = document.getElementById('autoBtn');
             
             if (!autoMode) {
-                // Start auto mode
                 autoMode = true;
                 autoBtn.textContent = 'Stop Auto Mode';
                 autoBtn.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
-                
-                // Run immediately
                 runAutoCheck();
-                
-                // Then every 5 seconds
                 autoInterval = setInterval(runAutoCheck, 5000);
             } else {
-                // Stop auto mode
                 autoMode = false;
                 autoBtn.textContent = 'Start Auto Mode';
                 autoBtn.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
@@ -387,7 +393,6 @@
         
         async function runAutoCheck() {
             if (isChecking) return;
-            
             const baseNumber = document.getElementById('phoneNumber').value.trim();
             
             if (!baseNumber) {
@@ -397,9 +402,9 @@
             }
             
             const result = await checkNumber(baseNumber);
-            
             if (result.error) {
                 showError(result.error);
+                toggleAutoMode(); // Error aane par auto mode band kar do
             } else {
                 updateStats(result);
                 addResultToUI(result);
@@ -412,7 +417,7 @@
             errorDiv.style.display = 'block';
             setTimeout(() => {
                 errorDiv.style.display = 'none';
-            }, 5000);
+            }, 8000); // 8 seconds tak error dikhayega taki aap aaram se padh sako
         }
     </script>
 </body>
