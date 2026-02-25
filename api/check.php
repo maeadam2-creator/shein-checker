@@ -1,9 +1,10 @@
 <?php
-// api/check.php - For Vercel deployment
+// --- JSON ERROR KILLER (Output Buffer) ---
+ob_start(); 
 
-// Enable error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+// api/check.php - For Vercel deployment
+error_reporting(0); // Saare errors OFF kar diye taki JSON kharab na ho
+ini_set('display_errors', 0);
 
 // Set headers for JSON response
 header('Content-Type: application/json');
@@ -11,6 +12,7 @@ header('Content-Type: application/json');
 // Check if this is a POST request
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
+    ob_clean();
     echo json_encode(['error' => 'Method not allowed. Use POST.']);
     exit;
 }
@@ -20,6 +22,7 @@ $input = json_decode(file_get_contents('php://input'), true);
 $baseNumber = $input['number'] ?? '';
 
 if (empty($baseNumber)) {
+    ob_clean();
     echo json_encode(['error' => 'Please provide a number']);
     exit;
 }
@@ -114,6 +117,7 @@ do {
     $completeNumber = generateCompleteNumber($baseNumber);
     $attempts++;
     if ($attempts > $maxAttempts) {
+        ob_clean();
         echo json_encode(['error' => 'Could not generate unique number']);
         exit;
     }
@@ -141,7 +145,8 @@ $j = json_decode($response['content'], true);
 $access_token = $j['access_token'] ?? null;
 
 if (!$access_token) {
-    echo json_encode(['error' => 'Failed to obtain access token']);
+    ob_clean();
+    echo json_encode(['error' => 'SHEIN ne block kar diya (Failed to get access token)']);
     exit;
 }
 
@@ -187,10 +192,10 @@ if (isset($result['success']) && $result['success'] === false) {
     $timestamp = date('Y-m-d H:i:s');
     $entry = "[$timestamp] Number: $completeNumber | EncryptedID: {$result['encryptedId']}\n";
     file_put_contents($registeredNumbersFile, $entry, FILE_APPEND | LOCK_EX);
-    
-    // Here you could continue with token generation if needed
-    // But Vercel has a 10-second timeout limit
 }
 
+// FINAL OUTPUT: ob_clean() saara kachra saaf kar dega aur sirf JSON bheja jayega
+ob_clean();
 echo json_encode($output, JSON_PRETTY_PRINT);
+exit;
 ?>
