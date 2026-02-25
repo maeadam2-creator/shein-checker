@@ -1,18 +1,7 @@
 {
-  "version": 2,
   "functions": {
-    "check.php": {
+    "api/*.php": {
       "runtime": "vercel-php@0.6.0"
     }
-  },
-  "routes": [
-    {
-      "src": "/api/check",
-      "dest": "/check.php"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
-  ]
+  }
 }
